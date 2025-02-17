@@ -1,0 +1,9 @@
+ansible_host: "192.168.48.123"
+ansible_user: "root"
+ansible_ssh_private_key_file: "/root/.ssh/proxmox"
+ansible_password: "f902243c-99a4-4ba1-966c-b28700b68096"
+
+bws:
+  access_token: "aa01b573-fe2d-4cbf-afc3-b28400c4000b"
+  ad_password: "e8d8b83f-06ee-4e11-926f-b286011f5a21"
+  gnome_keyring_password: "a44294c3-a73e-4761-ac12-b286011e62d2"

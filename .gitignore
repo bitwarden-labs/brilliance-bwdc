@@ -1,3 +1,26 @@
+#Secrets
 .env
-.venv
 state.json
+
+# In progress files
+ansible/configure-encrypted-secrets/tasks/old.main.yml.bak
+ansible/configure-cron-job/*
+
+# Python Output
+python/output
+
+# Python venvs
+ansible-venv
+
+# Python cache
+python/__pycache__
+
+# Terraform
+terraform
+terraform/.terraform
+terraform/.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup 
+
+# Not implemented
+bwdc-cli-lxc.tf

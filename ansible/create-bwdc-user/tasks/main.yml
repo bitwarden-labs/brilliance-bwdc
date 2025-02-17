@@ -1,0 +1,41 @@
+---
+- name: Create and configure bwdc user
+  become: true
+  block:
+    - name: Create bwdc user
+      ansible.builtin.user:
+        name: bwdc
+        comment: "Bitwarden Directory Connector"
+        shell: /bin/bash
+        createhome: true
+        state: present
+        groups: sudo
+        append: yes
+        password: "{{ 'ilovehorses4242' | password_hash('sha512') }}"
+        update_password: on_create
+
+    - name: Create .ssh directory for bwdc user
+      ansible.builtin.file:
+        path: /home/bwdc/.ssh
+        state: directory
+        owner: bwdc
+        group: bwdc
+        mode: '0700'
+
+    - name: Copy SSH public key for bwdc user
+      become: true
+      ansible.builtin.copy:
+        src: "/root/.ssh/proxmox.pub"
+        dest: "/home/bwdc/.ssh/authorized_keys"
+        owner: bwdc
+        group: bwdc
+        mode: '0600'
+
+    - name: Allow bwdc user to sudo without password
+      ansible.builtin.lineinfile:
+        path: "/etc/sodoers.d/bwdc"
+        create: true
+        line: 'bwdc ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+...

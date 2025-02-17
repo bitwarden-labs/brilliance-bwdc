@@ -1,0 +1,29 @@
+---
+- name: Copy and run setup_bwdc.sh as bwdc user
+  become: true
+  block:
+    - name: Copy the setup_bwdc.sh script to /tmp
+      copy:
+        src: files/bwdc.sh
+        dest: /tmp/bwdc.sh
+        owner: bwdc
+        group: bwdc
+        mode: '0755'
+
+    - name: Ensure bwdc user has permissions to execute the script
+      file:
+        path: /tmp/bwdc.sh
+        owner: bwdc
+        group: bwdc
+        mode: '0755'
+
+    - name: Run the setup_bwdc.sh script as bwdc user
+      become_user: bwdc
+      shell: /tmp/bwdc.sh
+      environment:
+        HOME: /home/bwdc
+        USER: bwdc
+      args:
+        executable: /bin/bash
+
+...

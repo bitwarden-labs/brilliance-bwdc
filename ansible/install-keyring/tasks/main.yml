@@ -1,0 +1,50 @@
+---
+- name: Install gnome-keyring and pre-reqs
+  become: true
+  block:
+  - name: Remove gnome keyring and pre-reqs
+    ansible.builtin.apt:
+      name:
+        - dbus-x11
+        # - libpam-gnome-keyring
+        - libsecret-1-0
+        - gnome-keyring
+      state: absent
+      purge: true
+    tags: remove_packages
+
+  - name: Install gnome-keyring pre-reqs
+    ansible.builtin.apt:
+      name:
+        - dbus-x11
+        # - libpam-gnome-keyring
+        - libsecret-1-0
+        - gnome-keyring
+      state: present
+      update_cache: true
+    tags: install_packages
+
+- name: Retrieve gnome-keyring password from Bitwarden Secrets Manager
+  block:
+    - ansible.builtin.set_fact:
+        gnome_keyring_password: "{{ lookup('bitwarden.secrets.lookup', 'a44294c3-a73e-4761-ac12-b286011e62d2') }}"
+
+- name: Check secret retrieval
+  ansible.builtin.debug:
+    var: gnome_keyring_password
+
+- name: Switch to bwdc user and configure keyring
+  become_user: bwdc
+  block:
+    - name: Configure gnome-keyring
+      ansible.builtin.shell: |
+        export $(dbus-launch)
+        dbus-launch
+        gnome-keyring-daemon --start --daemonize --components=secrets
+        echo '{{ gnome_keyring_password }}' | gnome-keyring-daemon -r -d --unlock
+      environment:
+        DISPLAY: ":0"
+      no_log: true
+      tags: configure_keyring
+
+...

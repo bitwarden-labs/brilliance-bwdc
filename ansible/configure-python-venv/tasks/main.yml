@@ -1,0 +1,35 @@
+---
+- name: Configure Python python3-venv
+  become: true
+  block:
+    - name: Ensure python3 and pip are installed
+      ansible.builtin.package:
+        name:
+          - python3
+          - python3-pip
+        state: present
+        update_cache: true
+
+    - name: Create a directory for the Python script
+      ansible.builtin.file:
+        dest: /home/bwdc/python
+        state: directory
+
+    - name: Copy requirements.txt to remote system
+      ansible.builtin.copy:
+        src: files/requirements.txt
+        dest: /home/bwdc/python/requirements.txt
+
+    - name: Create a Python virtual environment
+      ansible.builtin.command:
+        cmd: python3 -m venv /home/bwdc/venv
+        creates: /home/bwdc/venv
+
+    - name: Install dependencies in the venv
+      ansible.builtin.pip:
+        requirements: /home/bwdc/python/requirements.txt
+        virtualenv: /home/bwdc/venv
+        state: present
+        extra_args: --no-cache-dir
+
+...

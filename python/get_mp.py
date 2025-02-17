@@ -17,7 +17,7 @@ client = BitwardenClient(
 )
 
 # Add logging and set org id
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 organisation_id = os.getenv("BW_ORG_ID")
 
 # Set state file location
@@ -27,15 +27,15 @@ def get_secret_by_uuid(client, uuid):
     secret_response = client.secrets().get_by_ids([uuid])
 
     # Debug: Show SM response data structure
-    print("Type of secret_response.data:", type(secret_response.data))
-    print("Content of secret_response.data:", secret_response.data)
+    # print("Type of secret_response.data:", type(secret_response.data))
+    # print("Content of secret_response.data:", secret_response.data)
 
     # Check for success and existence of data list
     if secret_response.success and secret_response.data:
 
         secret_list = secret_response.data.data
-        print("Type of secrets_list:", type(secret_list))
-        print("Content of secrets_list:", secret_list)
+        # print("Type of secrets_list:", type(secret_list))
+        # print("Content of secrets_list:", secret_list)
 
         if len(secret_list) > 0:
             secret = secret_list[0]
@@ -53,19 +53,11 @@ def get_secret_by_uuid(client, uuid):
 
     return None
 
-
 # Authenticate with SM Access Token
 try:
     client.auth().login_access_token(os.getenv("BW_ACCESS_TOKEN"), state_path)
 except Exception as e:
     logging.error(f"Authentication failed: {e}")
 
-
 mpuid = 'd388b0e7-b85a-4304-aa2a-b28201001731'
-mp = get_secret_by_uuid(client=client, uuid=mpuid)
-
-if mp:
-    print("Secret Key:", mp["key"])
-    print("Secret Value:", mp["value"])
-else:
-    print("No secret found.")
+mp = get_secret_by_uuid(client=client, uuid=mpuid).get("value")

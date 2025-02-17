@@ -1,0 +1,16 @@
+---
+- name: Configure bwdc host
+  hosts: bwdc-cli-vm
+  gather_facts: true
+  roles:
+    # role: install-host-dependencies
+    - role: create-bwdc-user
+    - role: configure-bws-access
+    - role: install-bwdc-cli
+    - role: install-bw-cli
+    - role: configure-python-venv
+    - role: copy-python-scripts-plaintext-secrets
+    - role: install-keyring
+    - role: configure-encrypted-secrets
+    # role: configure-cron-job
+...

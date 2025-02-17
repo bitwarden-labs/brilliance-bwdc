@@ -1,0 +1,63 @@
+---
+- name: Copy Python scripts with plaintext secrets
+  become: true
+  block:
+    - name: Copy the Python directory to the remote system
+      ansible.builtin.copy:
+        src: /root/python
+        dest: /home/bwdc/
+        owner: "bwdc"
+        group: "bwdc"
+        mode: "0755"
+        directory_mode: "0755"
+
+    - name: Run the Python script
+      command: /home/bwdc/venv/bin/python /home/bwdc/python/get_data_json.py
+      register: script_output
+
+    - name: Display the output of the Python script
+      debug:
+        var: script_output.stdout_lines
+
+    - name: Check for success
+      ansible.builtin.set_fact:
+        script_success: "{{ 'returncode=0' in script_output.stdout }}"
+
+    - name: Debug result
+      ansible.builtin.debug:
+        msg: "Success: {{ script_success }}"
+      when: script_success
+
+    - name: Prep bwdc .config directory
+      ansible.builtin.file:
+        dest: "/home/bwdc/.config/Bitwarden Directory Connector"
+        state: directory
+
+    - name: Copy downloaded data.json to new location
+      become: true
+      ansible.builtin.command:
+        cmd: mv "/home/bwdc/python/output/data.json" "/home/bwdc/.config/Bitwarden Directory Connector/data.json"
+      when: script_success
+
+    - name: Ensure correct ownership and permissions of data.json
+      ansible.builtin.file:
+        path: "/home/bwdc/.config/Bitwarden Directory Connector/data.json"
+        owner: "bwdc"
+        group: "bwdc"
+        mode: "0644"
+      when: script_success
+
+    - name: Ensure correct ownership and permissions of .config directory
+      ansible.builtin.file:
+        path: /home/bwdc/.config
+        owner: "bwdc"
+        group: "bwdc"
+
+    - name: Ensure correct ownership and permissions of .config/Bitwarden Directory Connector directory
+      ansible.builtin.file:
+        path: "/home/bwdc/.config/Bitwarden Directory Connector"
+        owner: "bwdc"
+        group: "bwdc"
+        recurse: true
+
+...

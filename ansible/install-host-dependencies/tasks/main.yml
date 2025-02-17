@@ -1,0 +1,16 @@
+---
+- name: Install Python dependencies for Ansible control node
+  block:
+    - name: Ensure pip is installed
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
+      become: true
+
+    - name: Install passlib
+      ansible.builtin.pip:
+        name: passlib
+        state: present
+        extra_args: "--break-system-packages"
+
+...

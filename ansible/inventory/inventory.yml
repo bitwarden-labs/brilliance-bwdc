@@ -1,0 +1,9 @@
+---
+all:
+  children:
+    bwdc:
+      hosts:
+        digitalocean_keyring:
+        bwdc-cli:
+        bwdc-cli-vm:
+...

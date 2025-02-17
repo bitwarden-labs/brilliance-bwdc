@@ -1,0 +1,51 @@
+---
+- name: Setup Bitwarden Directory Connectory CLI
+  become: true
+  block:
+    - name: Ensure dependencies are installed
+      ansible.builtin.package:
+        name:
+          - unzip
+          - curl
+          - libsecret-1-0
+        state: present
+        update_cache: true
+
+    - name: Download Bitwarden Directory Connector CLI
+      ansible.builtin.get_url:
+        url: "https://github.com/bitwarden/directory-connector/releases/download/v2025.1.0/bwdc-linux-2025.1.0.zip"
+        dest: "/tmp/bwdc-linux-2025.1.0.zip"
+        mode: '0644'
+      register: download_result
+      until: download_result is succeeded
+      retries: 3
+      delay: 10
+      ignore_errors: true
+
+    - name: Extract binary from zip
+      ansible.builtin.unarchive:
+        src: "/tmp/bwdc-linux-2025.1.0.zip"
+        dest: /tmp/
+        remote_src: true
+
+    - name: Move binary to /usr/local/bin
+      ansible.builtin.command:
+        cmd: mv /tmp/bwdc /usr/local/bin/bwdc
+        creates: /usr/local/bin/bwdc
+
+    - name: Set permissions on binary
+      ansible.builtin.file:
+        path: /usr/local/bin/bwdc
+        mode: '0755'
+        owner: bwdc
+        group: bwdc
+
+    - name: Verify installation
+      ansible.builtin.command: bwdc --version
+      register: bwdc_version_output
+
+    - name: Display version
+      ansible.builtin.debug:
+        msg: "Bitwarden Directory Connector CLI version is {{ bwdc_version_output.stdout }}"
+
+...

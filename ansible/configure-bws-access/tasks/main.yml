@@ -1,0 +1,61 @@
+---
+- name: Install pre-requisite packages
+  become: true
+  ansible.builtin.apt:
+    name:
+      - git
+      - python3-venv
+      - unzip
+    state: present
+    update_cache: true
+
+- name: Install BWS CLI tool
+  become: true
+  block:
+    - name: Download BWS zip
+      ansible.builtin.get_url:
+        url: "https://github.com/bitwarden/sdk/releases/download/bws-v1.0.0/bws-x86_64-unknown-linux-gnu-1.0.0.zip"
+        dest: /tmp/bws-x86_64-unknown-linux-gnu-1.0.0.zip
+        owner: "bwdc"
+        group: "bwdc"
+        mode: "0644"
+      become_user: "bwdc"
+      register: download_result
+      until: download_result is succeeded
+      retries: 3
+      delay: 10
+      ignore_errors: true
+
+    - name: Unzip downloaded file
+      ansible.builtin.unarchive:
+        src: /tmp/bws-x86_64-unknown-linux-gnu-1.0.0.zip
+        dest: /usr/local/bin/
+        remote_src: true
+        owner: "bwdc"
+        group: "bwdc"
+
+- name: Configure BWS CLI
+  become: true
+  block:
+    - name: Obtain machine token from Bitwarden Secrets Manager
+      ansible.builtin.set_fact:
+        machine_token: "{{ lookup('bitwarden.secrets.lookup', vars['bws']['access_token']) }}"
+
+    - name: Set Machine Token to ENV
+      ansible.builtin.lineinfile:
+        path: /etc/environment
+        line: "BWS_ACCESS_TOKEN={{ machine_token }}"
+        create: true
+
+- name: Check Machine Token
+  block:
+    - name: Check machine token is available
+      become: true
+      ansible.builtin.shell: "/bin/bash -c 'source /etc/environment && echo $BWS_ACCESS_TOKEN'"
+      register: remote_machine_token
+    - name: Display machine_token
+      ansible.builtin.debug:
+        msg: "Machine Token is {{ remote_machine_token.stdout }}"
+      become_user: "bwdc"
+
+...
