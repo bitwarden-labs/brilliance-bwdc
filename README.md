@@ -1,6 +1,6 @@
 # Bitwarden Directory Connector deployment options
 
-Welcome to this repo detailing useful configurations and methods for deploying Bitwarden Directory Connector on Linux.  This repo is referred to in the accompanying YouTube video located at *(available Thursday!)*
+Welcome to this repo detailing useful configurations and methods for deploying Bitwarden Directory Connector on Linux.  This repo is referred to in the accompanying YouTube video located [here](https://www.youtube.com/watch?v=u9IUvH7j7bo).
 
 The repo contains a few main components:
 
