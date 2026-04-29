@@ -12,6 +12,10 @@ python/output
 # Python venvs
 ansible-venv
 
+# Pipenv
+Pipfile.lock
+Pipfile
+
 # Python cache
 python/__pycache__
 
